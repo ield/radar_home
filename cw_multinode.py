@@ -7,9 +7,9 @@ from bleak import BleakScanner, BleakClient
 
 # Configurable variables
 # Seconds to update the file in which the data is written
-FILE_INTERVAL = 10
+FILE_INTERVAL = 600
 # Beginning of the filename
-FILEPATH_MEAS = "server_docs/meas/"
+FILEPATH_MEAS = "meas/"
 # Characteristic read and used for notifications
 CHARACTERISTIC_UUID = "000000F1-8E22-4541-9D4C-21EDAE82ED19"
 
@@ -67,7 +67,7 @@ async def process_notifications(selected_device, notification_queue):
     to a CSV file
     """
     batch = bytearray()
-    BATCH_SIZE = 1000  # Escribiremos cada 1000 notificaciones
+    BATCH_SIZE = 100  # Escribiremos cada 1000 notificaciones
 
     # Start time for file rotation
     start_time = time.time()
@@ -116,11 +116,16 @@ async def process_notifications(selected_device, notification_queue):
                 
     except asyncio.CancelledError:
         # Final flush, before exit, after the user cancels the execution
+        print(f"Desconectando {device_name}")
+            
         if batch:
             bin_file.write(batch)
             bin_file.flush()
             
         bin_file.close()
+
+        await client.stop_notify(CHARACTERISTIC_UUID)
+
         raise
 
 async def run():
@@ -153,10 +158,16 @@ async def run():
 
     try:
         await asyncio.gather(*tasks)
-    except KeyboardInterrupt:
-        print("Desconectando por interrupción de teclado...")
+    except asyncio.CancelledError:
+        # Close all tasks
         for t in tasks:
             t.cancel()
+            try:
+                await t
+            except asyncio.CancelledError:
+                pass
+        print("Dispositivos desconectados. Fin del programa")
+
 
 if __name__ == "__main__":
     asyncio.run(run())
