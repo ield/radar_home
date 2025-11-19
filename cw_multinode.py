@@ -15,25 +15,6 @@ CHARACTERISTIC_UUID = "000000F1-8E22-4541-9D4C-21EDAE82ED19"
 NAME_REF = "Rad_CW_C_"
 
 
-# Function containing the discovery procedure
-async def find_device():
-    """Scan until the desired device is found."""
-    print("Scanning for BLE devices...")
-    while True:
-        devices = await BleakScanner.discover(timeout=5.0)
-
-        # Escoge el dispositivo indicado
-        dispositivos_filtrados = [
-            d for d in devices if d.name and NAME_REF in d.name
-        ]
-        if dispositivos_filtrados
-            return dispositivos_filtrados
-
-        await asyncio.sleep(3)
-
-
-    
-
 # Function containing all the connection procedure
 async def connect_to_device(device):
     print(f"Conectando a {device.name} ({device.address})...")
@@ -51,6 +32,7 @@ async def connect_to_device(device):
                     await asyncio.sleep(1)
             except asyncio.CancelledError:
                 pass
+                await client.stop_notify(CHARACTERISTIC_UUID)
             finally:
                 consumer_task.cancel()
                 await asyncio.sleep(0)
@@ -145,12 +127,18 @@ async def process_notifications(selected_device, notification_queue):
             
         bin_file.close()
 
-        await client.stop_notify(CHARACTERISTIC_UUID)
-
         raise
 
 async def run():
-    global packet_count
+    """Scan until the desired device is found."""
+    print("Scanning for BLE devices...")
+    devices = await BleakScanner.discover(timeout=5.0)
+
+    # Escoge el dispositivo indicado
+    dispositivos_filtrados = [
+        d for d in devices if d.name and NAME_REF in d.name
+    ]
+        
 
     # Launch all device connections concurrently 
     # with a small delay between connections
