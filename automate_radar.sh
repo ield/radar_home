@@ -5,8 +5,8 @@ cd /home/gmr-lab/Desktop/radar_home/
 git pull
 
 # Activate environment
-source env_home/bin/activate
+source /home/gmr-lab/Desktop/radar_home/env_home/bin/activate
 
 # Start the program with daily log file
-LOGFILE="meas/log_$(date +%Y%m%d).txt"
+LOGFILE="/home/gmr-lab/Desktop/radar_home/meas/log_$(date +%Y%m%d).txt"
 nohup python3 cw_multinode.py > "$LOGFILE" 2>&1 &
