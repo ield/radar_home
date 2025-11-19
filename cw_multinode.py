@@ -12,6 +12,27 @@ FILE_INTERVAL = 600
 FILEPATH_MEAS = "meas/"
 # Characteristic read and used for notifications
 CHARACTERISTIC_UUID = "000000F1-8E22-4541-9D4C-21EDAE82ED19"
+NAME_REF = "Rad_CW_C_"
+
+
+# Function containing the discovery procedure
+async def find_device():
+    """Scan until the desired device is found."""
+    print("Scanning for BLE devices...")
+    while True:
+        devices = await BleakScanner.discover(timeout=5.0)
+
+        # Escoge el dispositivo indicado
+        dispositivos_filtrados = [
+            d for d in devices if d.name and NAME_REF in d.name
+        ]
+        if dispositivos_filtrados
+            return dispositivos_filtrados
+
+        await asyncio.sleep(3)
+
+
+    
 
 # Function containing all the connection procedure
 async def connect_to_device(device):
@@ -130,23 +151,6 @@ async def process_notifications(selected_device, notification_queue):
 
 async def run():
     global packet_count
-    NAME_REF = "Rad_CW_L_"
-        
-    print("Escaneando dispositivos BLE...")
-    dispositivos = await BleakScanner.discover()
-    
-    if not dispositivos:
-        print("No se encontraron dispositivos.")
-        return
-
-    # Escoge el dispositivo indicado
-    dispositivos_filtrados = [
-        d for d in dispositivos if d.name and NAME_REF in d.name
-    ]
-
-    if not dispositivos_filtrados:
-        print("Dispositivo no encontrado")
-        return
 
     # Launch all device connections concurrently 
     # with a small delay between connections
