@@ -1,12 +1,16 @@
 #!/bin/bash
-cd /home/gmr-lab/Desktop/radar_home/
+
+# Go to project directory
+cd /home/gmr-lab/Desktop/radar_home/ || exit 1
 
 # Update git repository
 git pull
 
-# Activate environment
+# Activate Python environment
 source /home/gmr-lab/Desktop/radar_home/env_home/bin/activate
 
-# Start the program with daily log file
+# Create daily log file
 LOGFILE="/home/gmr-lab/Desktop/radar_home/meas/log_$(date +%Y%m%d).txt"
-nohup python3 cw_multinode.py > "$LOGFILE" 2>&1 &
+
+# Run Python script in background with unbuffered output
+nohup python3 -u cw_multinode.py > "$LOGFILE" 2>&1 < /dev/null &
