@@ -15,25 +15,30 @@ $remoteFilesRaw = ssh "$remoteUser@$remoteHost" 'ls -1t /home/gmr-lab/Desktop/ra
 # Split lines and trim
 $remoteFiles = $remoteFilesRaw -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
 
+# Today's date in YYYYMMDD format
+$todayString = (Get-Date).ToString("yyyyMMdd")
+
+# Filter files created before today
+$filesBeforeToday = $remoteFiles | Where-Object {
+    $filename = [System.IO.Path]::GetFileName($_)
+    if ($filename -match '\d{14}(?=\.bin$)') {
+        $fileDate = $Matches[0].Substring(0,8)
+        [int]$fileDate -lt [int]$todayString
+    } else {
+        $false
+    }
+}
+
 # Show what we got
-if (-not $remoteFilesRaw) {
+if (-not $filesBeforeToday) {
     Write-Host "No files found on remote."
     exit
 }
-Write-Host "$($remoteFiles.Count) remote files found."
-
-$remoteFiles = $remoteFilesRaw -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ }
-
-# Get list of local BIN filenames
-$localFiles = Get-ChildItem $localPath -Filter *.bin | ForEach-Object { $_.Name }
 
 # Determine which files need to be copied
-$filesToCopy = $remoteFiles | Where-Object { $localFiles -notcontains ([System.IO.Path]::GetFileName($_)) }
+$filesToCopy = $filesBeforeToday
 
-if (-not $filesToCopy) {
-    Write-Host "No new files to transfer."
-    exit
-}
+Write-Host "$($filesToCopy.Count) remote files found."
 
 $totalFiles = $filesToCopy.Count
 $counter = 0
