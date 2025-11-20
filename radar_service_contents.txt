@@ -1,0 +1,14 @@
+[Unit]
+Description=RadarMonitorRebootService
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=gmr-lab
+WorkingDirectory=/home/gmr-lab/Desktop/radar_home/
+ExecStart=/bin/bash /home/gmr-lab/Desktop/radar_home/automate_radar.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
